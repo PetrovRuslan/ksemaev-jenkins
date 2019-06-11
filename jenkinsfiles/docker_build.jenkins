@@ -12,6 +12,16 @@ pipeline {
         timestamps()
     }
     stages {
+        stage("docker login") {
+            steps {
+                echo " ============== docker login =============== "
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_petrovru', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh """
+                    docker login -u $USERNAME -p $PASSWORD
+                    """
+                }
+            }
+        }
         stage("create docker image") {
             steps {
                 echo " ============== start building image =================="
@@ -19,6 +29,13 @@ pipeline {
                 	sh 'docker build -t docker_repo/toolbox:latest . '
                 }
             }
+        }
+        stage("docker push") {
+            steps {
+                echo " ============== start pushing image =================="
+                sh '''
+                docker push docker_repo/toolbox:latest
+                '''
         }
     }
 }
